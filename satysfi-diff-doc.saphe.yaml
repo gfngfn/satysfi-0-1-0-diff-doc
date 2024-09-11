@@ -1,7 +1,7 @@
 saphe: "^0.1.0-alpha.1"
 satysfi: "^0.1.0-alpha.1"
 authors:
-  - "Your Name"
+  - "Takashi Suwa"
 registries:
   - name: "default"
     git:
@@ -14,6 +14,16 @@ dependencies:
     registered:
       registry: "default"
       name: "stdlib"
+      requirement: "^0.0.1"
+  - used_as: "Code"
+    registered:
+      registry: "default"
+      name: "code"
+      requirement: "^0.0.1"
+  - used_as: "FontLatinModern"
+    registered:
+      registry: "default"
+      name: "font-latin-modern"
       requirement: "^0.0.1"
   - used_as: "StdJaReport"
     registered:

@@ -1,6 +1,8 @@
 use package open Stdlib.Logo
 use package open StdJaReport
 
+use open Local of `./local`
+
 document (|
   title = {\SATySFi; 0.0.xユーザのための0.1.0-alpha.1手引き},
   author = {Takashi Suwa},
@@ -13,9 +15,50 @@ document (|
     }
   >
   +chapter{言語設計上の非互換な変化}<
-    +section{細かい構文的差異}<>
-    +section{レコード}<>
-    +section{モジュールシステム}<>
+    +section{細かい構文的差異}<
+      +subsection{リストとレコードの区切り記号}<
+        +p{
+          リストおよびレコードのリテラルでは，
+          区切り記号としてセミコロンではなくコンマが使われるようになります：
+
+          \compare(|
+            old = ```
+              [3; 1; 4; 1; 5; 9; 2]
+            ```,
+            new = ```
+              [3, 1, 4, 1, 5, 9, 2]
+            ```,
+          |);
+        }
+      >
+      +subsection{match式}<
+      >
+      +subsection{定義の構文}<
+      >
+      +subsection{let open}<
+      >
+      +subsection{page型の廃止}<
+      >
+      +subsection{graphics型の変更}<
+      >
+      +subsection{math-char-class型の拡張}<
+      >
+      +subsection{数式コマンドの意味論}<
+      >
+      +subsection{型註釈}<
+      >
+    >
+    +section{レコード型の多相性}<
+    >
+    +section{モジュールシステム}<
+    >
+    +section{多段階計算}<
+    >
   >
-  +chapter{エコシステムSaphe}<>
+  +chapter{エコシステムSaphe}<
+  >
+  +chapter{テスト機構}<
+  >
+  +chapter{今後入りそうな変更}<
+  >
 >

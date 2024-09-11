@@ -1,0 +1,35 @@
+use package open Stdlib
+use package FontLatinModern
+use package Code
+
+module Local = struct
+
+  module OldCodeSettings = struct
+    val font-family = FontLatinModern.mono
+    val text-color = Color.gray 0.25
+    val fill-color = Color.gray 0.875
+    val stroke-color = Color.gray 0.5
+    val stroke-thickness = 1pt
+  end
+  module OldCode = Code.Make OldCodeSettings
+
+  module NewCodeSettings = struct
+    val font-family = FontLatinModern.mono
+    val text-color = Color.black
+    val fill-color = Color.rgb 0.875 0.875 0.9375
+    val stroke-color = Color.rgb 0.5 0.5 0.75
+    val stroke-thickness = 1pt
+  end
+  module NewCode = Code.Make NewCodeSettings
+
+
+  val inline ctx \compare r =
+    let len = get-font-size ctx in
+    inline-fil ++
+      embed-block-breakable ctx
+        (read-block (ctx |> set-paragraph-margin len len) '<
+          +OldCode.code(r#old);
+          +Block.skip(0pt -' len *' 2.);
+          +NewCode.code(r#new);
+        >)
+end
