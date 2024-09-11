@@ -1,0 +1,19 @@
+use package open Stdlib.Logo
+use package open StdJaReport
+
+document (|
+  title = {\SATySFi; 0.0.xユーザのための0.1.0-alpha.1手引き},
+  author = {Takashi Suwa},
+|) '<
+  +chapter{はじめに}<
+    +p{
+      \SATySFi; 0.1.0-alpha.1が1–2ヵ月程度の近いうちにリリースできそうな形になってきたので，
+      既に\SATySFi; 0.0.xに馴染んでいるユーザの方々向けに，0.0.xと比べてどのような非互換な変更が入るかを共有したいと思います．
+    }
+  >
+  +chapter{言語設計上の非互換な変化}<
+    +section{細かい構文的差異}<>
+    +section{レコード}<>
+    +section{モジュール}<>
+  >
+>
