@@ -1,35 +1,76 @@
 use package open Stdlib
 use package FontLatinModern
-use package Code
 
-module Local = struct
+module Local :> sig
+  val \compare : inline [(| old : string, new : string |)]
+end = struct
 
-  module OldCodeSettings = struct
-    val font-family = FontLatinModern.mono
-    val text-color = Color.gray 0.25
-    val fill-color = Color.gray 0.875
-    val stroke-color = Color.gray 0.5
-    val stroke-thickness = 1pt
-  end
-  module OldCode = Code.Make OldCodeSettings
+  % Copied from the package `code`. TODO: refine this
+  val build-code ctx it-head hanging code =
+    let font-size = get-font-size ctx in
+    let char-width = Inline.get-natural-advance (read-inline ctx {0}) in
+    let lines =
+      match split-into-lines code with
+      | []        -> []
+      | [x]       -> [x]
+      | _ :: tail -> tail
+      end
+    in
+    let ib-code =
+      lines |> List.map-adjacent (fun (i, s) _ opt-next -> (
+        let ib-last =
+          if Option.is-none opt-next then
+            inline-fil
+          else
+            inline-fil ++ Inline.mandatory-break ctx
+        in
+        let ctx-code = ctx |> set-space-ratio (char-width /' font-size) 0. 0. in
+        inline-skip (char-width *' (float i))
+          ++ read-inline ctx-code (embed-string s)
+          ++ ib-last
+      )) |> Inline.concat
+    in
+    let ib-head = read-inline ctx it-head in
+    let head-width = Inline.get-natural-advance ib-head in
+    let ib-prefix = inline-skip (0pt -' hanging) ++ ib-head ++ inline-skip (hanging -' head-width) in
+    Block.form-paragraph ctx (ib-prefix ++ ib-code)
 
-  module NewCodeSettings = struct
-    val font-family = FontLatinModern.mono
-    val text-color = Color.black
-    val fill-color = Color.rgb 0.875 0.875 0.9375
-    val stroke-color = Color.rgb 0.5 0.5 0.75
-    val stroke-thickness = 1pt
-  end
-  module NewCode = Code.Make NewCodeSettings
-
+  val block ctx +code-in-compare r =
+    let left-indent-length = 30pt in
+    let thickness = 1pt in
+    let pad = 5pt in
+    let pads = (left-indent-length, pad, pad, pad) in
+    let decoset = VDecoSet.simple-frame thickness r#stroke-color r#fill-color in
+    block-frame-breakable ctx pads decoset (fun ctx -> (
+      build-code
+        (ctx
+          |> set-text-color r#text-color
+          |> set-font Latin (FontLatinModern.mono, 1., 0.)
+          |> set-hyphen-penalty 100000)
+        r#heading
+        (left-indent-length -' pad)
+        r#code
+    ))
 
   val inline ctx \compare r =
     let len = get-font-size ctx in
     inline-fil ++
       embed-block-breakable ctx
         (read-block (ctx |> set-paragraph-margin len len) '<
-          +OldCode.code(r#old);
+          +code-in-compare(|
+            stroke-color = Color.gray 0.75,
+            fill-color = Color.gray 0.9375,
+            text-color = Color.gray 0.375,
+            heading = {旧},
+            code = r#old,
+          |);
           +Block.skip(0pt -' len *' 2.);
-          +NewCode.code(r#new);
+          +code-in-compare(|
+            stroke-color = Color.rgb 0.5 0.625 1.,
+            fill-color = Color.rgb 0.9375 0.95 0.975,
+            text-color = Color.black,
+            heading = {新},
+            code = r#new,
+          |);
         >)
 end

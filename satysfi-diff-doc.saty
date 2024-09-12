@@ -19,7 +19,10 @@ document (|
       +subsection{リストとレコードの区切り記号}<
         +p{
           リストおよびレコードのリテラルでは，
-          区切り記号としてセミコロンではなくコンマが使われるようになります：
+          区切り記号としてセミコロンではなくコンマが使われるようになります\footnote{
+            もともとセミコロンを区切り記号にしていたのは，
+            単にOCamlの具象構文に追従したためでした．
+          }：
 
           \compare(|
             old = ```
@@ -29,9 +32,38 @@ document (|
               [3, 1, 4, 1, 5, 9, 2]
             ```,
           |);
+
+          \compare(|
+            old = ```
+              (| foo = 42; bar = `qux` |)
+            ```,
+            new = ```
+              (| foo = 42, bar = `qux` |)
+            ```,
+          |);
+
+          従来末尾セミコロンが許容されていたのと同様に，いずれも末尾コンマが許容されます．
         }
       >
       +subsection{match式}<
+        +p{
+          match式は，いわゆる「ぶら下がりmatch」による構文上の曖昧性を解消するために，
+          `end` というトークンを最後につけるようになります：
+
+          \compare(|
+            old = ```
+              match opt with
+              | None    -> default
+              | Some(x) -> f x
+            ```,
+            new = ```
+              match opt with
+              | None    -> default
+              | Some(x) -> f x
+              end
+            ```,
+          |);
+        }
       >
       +subsection{定義の構文}<
       >
