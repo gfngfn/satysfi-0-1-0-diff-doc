@@ -36,6 +36,7 @@ end = struct
     Block.form-paragraph ctx (ib-prefix ++ ib-code)
 
   val block ctx +code-in-compare r =
+    let font-size = get-font-size ctx in
     let left-indent-length = 30pt in
     let thickness = 1pt in
     let pad = 5pt in
@@ -44,6 +45,7 @@ end = struct
     block-frame-breakable ctx pads decoset (fun ctx -> (
       build-code
         (ctx
+          |> set-leading (font-size *' 1.1)
           |> set-text-color r#text-color
           |> set-font Latin (FontLatinModern.mono, 1., 0.)
           |> set-hyphen-penalty 100000)

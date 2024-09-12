@@ -15,13 +15,21 @@ document (|
     }
   >
   +chapter{言語設計上の非互換な変化}<
-    +section{細かい構文的差異}<
+    +section{具象構文上の差異}<
       +subsection{リストとレコードの区切り記号}<
         +p{
           リストおよびレコードのリテラルでは，
           区切り記号としてセミコロンではなくコンマが使われるようになります\footnote{
             もともとセミコロンを区切り記号にしていたのは，
             単にOCamlの具象構文に追従したためでした．
+            OCamlの場合はタプルに括弧が必須ではなく
+            `a, b` と書いただけでタプル扱いとなる構文を採用しており，
+            それゆえ `[a, b; c, d]` のようにタプルのリストが簡単に書けるなどの
+            或る種の利点らしきものがありましたが，
+            \SATySFi;では却ってわかりづらくなることを避けるために
+            タプルは括弧を必須としており，
+            特にコンマとセミコロンを区別する動機がないため，
+            この機会にコンマに揃えることにしました．
           }：
 
           \compare(|
@@ -47,28 +55,52 @@ document (|
       >
       +subsection{match式}<
         +p{
-          match式は，いわゆる「ぶら下がりmatch」による構文上の曖昧性を解消するために，
-          `end` というトークンを最後につけるようになります：
+          match式は，match式が入れ子になった際のいわゆる「ぶら下がりmatch」による構文上の曖昧性を解消するために，
+          `end` というトークンを最後につける構文に変更されます：
 
           \compare(|
             old = ```
-              match opt with
-              | None    -> default
-              | Some(x) -> f x
+              match opt1 with
+              | None ->
+                  ( match opt2 with
+                    | None     -> y
+                    | Some(x2) -> f x2
+                  )
+              | Some(x1) ->
+                  f x1
             ```,
             new = ```
-              match opt with
-              | None    -> default
-              | Some(x) -> f x
+              match opt1 with
+              | None ->
+                  match opt2 with
+                  | None     -> y
+                  | Some(x2) -> f x2
+                  end
+              | Some(x1) ->
+                  f x
               end
             ```,
           |);
         }
       >
-      +subsection{定義の構文}<
-      >
       +subsection{let open}<
+        +p{
+          OCamlに倣い，ローカルなモジュールのオープンは先頭に `let` をつけます：
+
+          \compare(|
+            old = ```
+              open Calc in succ 42
+            ```,
+            new = ```
+              let open Calc in succ 42
+            ```,
+          |);
+        }
       >
+    >
+    +section{ソースファイルとトップレベル定義}<
+    >
+    +section{型つけの変更}<
       +subsection{page型の廃止}<
       >
       +subsection{graphics型の変更}<
