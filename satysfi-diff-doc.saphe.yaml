@@ -15,15 +15,15 @@ dependencies:
       registry: "default"
       name: "stdlib"
       requirement: "^0.0.1"
-  - used_as: "Code"
-    registered:
-      registry: "default"
-      name: "code"
-      requirement: "^0.0.1"
   - used_as: "FontLatinModern"
     registered:
       registry: "default"
       name: "font-latin-modern"
+      requirement: "^0.0.1"
+  - used_as: "FontIpaEx"
+    registered:
+      registry: "default"
+      name: "font-ipa-ex"
       requirement: "^0.0.1"
   - used_as: "StdJaReport"
     registered:

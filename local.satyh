@@ -1,9 +1,24 @@
 use package open Stdlib
+use package FontIpaEx
 use package FontLatinModern
 
 module Local :> sig
+  val \emph : inline [inline-text]
   val \compare : inline [(| old : string, new : string |)]
 end = struct
+
+  val emph-color = Color.rgb 0. 0. 0.5
+  val emph-font-cjk = FontIpaEx.gothic
+  val emph-font-latin = FontLatinModern.sans
+
+  val inline ctx \emph it =
+    read-inline
+      (ctx
+        |> set-text-color emph-color
+        |> set-font Latin (emph-font-latin, 1., 0.)
+        |> set-font HanIdeographic (emph-font-cjk, 0.88, 0.)
+        |> set-font Kana (emph-font-cjk, 0.88, 0.))
+      it
 
   % Copied from the package `code`. TODO: refine this
   val build-code ctx it-head hanging code =

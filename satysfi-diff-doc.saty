@@ -11,15 +11,17 @@ document (|
     +p{
       \SATySFi; 0.1.0-alpha.1が1–2ヵ月程度の近いうちにリリースできそうな形になってきたので，
       既に\SATySFi; 0.0.xに馴染んでいるユーザの方々向けに，
-      0.0.xと比べてどのような非互換な変更が入るかを共有したいと思います．
+      0.0.xと比べてどのような非互換な変更が入るかをかなり簡潔に共有したいと思います．
     }
   >
   +chapter{言語設計上の非互換な変化}<
     +section{具象構文上の差異}<
       +subsection{リストとレコードの区切り記号}<
         +p{
-          リストおよびレコードのリテラルでは，
-          区切り記号としてセミコロンではなくコンマが使われるようになります\footnote{
+          \emph{
+            リストおよびレコードのリテラルでは，
+            区切り記号としてセミコロンではなくコンマが使われるようになります
+          }\footnote{
             もともとセミコロンを区切り記号にしていたのは，
             単にOCamlの具象構文に追従したためでした．
             OCamlの場合はタプルに括弧が必須ではなく
@@ -50,13 +52,13 @@ document (|
             ```,
           |);
 
-          従来末尾セミコロンが許容されていたのと同様に，いずれも末尾コンマが許容されます．
+          従来末尾セミコロンが許容されていたのと同様に，\emph{いずれも末尾コンマが許容されます}．
         }
       >
       +subsection{match式}<
         +p{
-          match式は，match式が入れ子になった際のいわゆる「ぶら下がりmatch」による構文上の曖昧性を解消するために，
-          `end` というトークンを最後につける構文に変更されます：
+          match式が入れ子になった際のいわゆる「ぶら下がりmatch」による構文上の曖昧性を解消するために，
+          \emph{match式は `end` というトークンを最後につける構文に変更されます}：
 
           \compare(|
             old = ```
@@ -83,9 +85,9 @@ document (|
           |);
         }
       >
-      +subsection{let open}<
+      +subsection{モジュールのローカルなオープン}<
         +p{
-          OCamlに倣い，ローカルなモジュールのオープンは先頭に `let` をつけます：
+          OCamlに倣い，\emph{ローカルなモジュールのオープンは先頭に `let` をつけます}：
 
           \compare(|
             old = ```
@@ -101,8 +103,8 @@ document (|
       >
       +subsection{型コンストラクタの前置}<
         +p{
-          OCamlやStandard MLなどとは異なり，
-          型コンストラクタは型引数に対して前置するようになります：
+          OCamlなどとは異なり，
+          \emph{型コンストラクタは型引数に対して前置するようになります}：
 
           \compare(|
             old = ```
@@ -118,6 +120,28 @@ document (|
           |);
 
           これは主に式の函数適用が函数→引数の順であるのと揃えることを意図しています．
+        }
+      >
+      +subsection{コマンドの型}<
+        +p{
+          コマンドの型は従来コンストラクタ相当のキーワード `inline-cmd`，`block-cmd`，`math-cmd` が
+          後置されるように書いていましたが，
+          0.1.0-alpha.1では
+          \emph{型コンストラクタ相当の `inline`，`block`，`math` というキーワードが前置され，
+          かつ引数の型はコンマ区切りで書かれるようになります}：
+
+          \compare(|
+            old = ```
+              val \emph : [inline-text] inline-cmd
+              val +section : [inline-text; block-text] block-cmd
+              val \oplus : [] math-cmd
+            ```,
+            new = ```
+              val \emph : inline [inline-text]
+              val +section : block [inline-text, block-text]
+              val \oplus : math []
+            ```
+          |);
         }
       >
     >
@@ -156,8 +180,8 @@ document (|
           ```,
         |);
 
-        一方で，ライブラリやローカルな定義を集めたソースファイル（拡張子が `.satyh` や `.satyg` などのもの）は
-        書き方がわりと変わります．1つのソースファイル中にはただ1つのモジュールの定義を書くように強制されます：
+        一方で，ライブラリやローカルな定義を集めたソースファイル（拡張子が `.satyh` だったり `.satyg` だったりするもの）は
+        書き方が或る程度変わります．\emph{1つのソースファイル中にはモジュールの定義1つだけが書けるようになります}：
 
         \compare(|
           old = ```
@@ -169,7 +193,7 @@ document (|
             let bar = 42
 
             let-rec show-list show-elem xs =
-              List.fold-left-adjacent (fun s x prev-opt next-opt -> (
+              List.fold-left-adjacent (fun s x _ next-opt -> (
                 s ^ show-elem x ^
                   (if Option.is-none next-opt then ` ` else `, `#)
               )) ` ` xs
@@ -186,7 +210,7 @@ document (|
               val bar = 42
 
               val rec show-list show-elem xs =
-                List.fold-adjacent (fun s x prev-opt next-opt -> (
+                List.fold-adjacent (fun s x _ next-opt -> (
                   s ^ show-elem x ^
                     (if Option.is-none next-opt then ` ` else `, `#)
                 )) ` ` xs
@@ -197,8 +221,8 @@ document (|
           ```,
         |);
 
-        したがってトップレベルの値の束縛は必ずモジュールのメンバとなり，
-        具象構文としても先頭のトークンを `let` ではなく `val` で書くように変更されます．
+        したがって\emph{トップレベルの値の束縛は必ずモジュールのメンバとなり，
+        具象構文としても先頭のトークンを `let` ではなく `val` で書くように変更されます}．
         もともと `let-rec` と書いていたものは `val rec` に，
         `let-mutable` と書いていたものは `val mutable` に，
         `let-inline` と書いていたものは `val inline` に，
@@ -209,7 +233,7 @@ document (|
       }
     >
     +section{型つけの変更}<
-      +subsection{page型の廃止}<
+      +subsection{`page` 型の廃止}<
         +p{
           0.0.xには用紙サイズ指定のために `A4Paper` などのコンストラクタをもつ `page` 型がありましたが，
           これは `length * length` で事足りるため廃止します．
@@ -217,7 +241,7 @@ document (|
           プリアンブルに `use package open Stdlib` と記載すれば `PaperSize.a4` などが使えるようになります．
         }
       >
-      +subsection{graphics型の変更}<
+      +subsection{`graphics` 型の変更}<
         +p{
           従来，グラフィックス相当のデータは `graphics list` 型の式で構築されていました．
           しかし，`graphics` 型と `graphics list` 型との区別はせいぜい実装の都合でしかなく，
@@ -238,26 +262,49 @@ document (|
           に改まりました．
         }
       >
-      +subsection{math-char-class型の拡張}<
+      +subsection{`math-char-class` 型の拡張}<
         +p{
-          数式の文字クラスを表す `math-char-class` 型に，
+          \emph{数式の文字クラスを表す `math-char-class` 型に，
           サンセリフ体とタイプライタ体に関する5つのコンストラクタ
           `MathSansSerif`，
           `MathBoldSansSerif`，
           `MathItalicSansSerif`，
           `MathBoldItalicSansSerif`，
           `MathTypewriter`
-          が追加されます．
+          が追加されます}．
           これにより，Unicodeコードポイントが与えられている
           数式文字クラスはひととおり揃いました．
         }
       >
-      +subsection{数式コマンドの意味論}<
+      +subsection{数式の型と数式コマンドの意味論}<
+        +p{
+          従来の数式には一律に `math` 型がつけられ，
+          コマンドは `\frac : [math; math] math-cmd` などという型つけが為されていました．
+          0.1.0-alpha.1では数式の型つけが大きく変わり，
+          まずインラインやブロックと同様に\emph{`math-text` 型と `math-boxes` 型の区別ができました}．
+          前者は原稿上に書かれた数式を扱う型で，後者は“既に組まれた”数式の型に相当します．
+          \emph{これに伴い `read-math : context -> math-text -> math-boxes` というプリミティブが用意され，
+          数式コマンドの定義は通常の引数とともに `context` 型の“第0引数” を受け取り
+          `math-boxes` 型の値を返すような定式化に変わります}：
+
+          \compare(|
+            old = ```
+              let-math \frac m1 m2 =
+                math-frac m1 m2
+            ```,
+            new = ```
+              val math ctx \frac mt1 mt2 =
+                let mb1 = read-math ctx mt1 in
+                let mb2 = read-math ctx mt2 in
+                math-frac ctx mb1 mb2
+            ```,
+          |);
+        }
       >
       +subsection{型註釈}<
       >
-    >
-    +section{レコード型の多相性}<
+      +subsection{レコード型の多相性}<
+      >
     >
     +section{モジュールシステム}<
     >

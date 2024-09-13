@@ -117,8 +117,8 @@ locks:
     package_name: unidata
     version: 0.0.1
 dependencies:
-- name: registered.6f2b80e9bb7c4e8af2104999fc25dbb3.code.0.0.1
-  used_as: Code
+- name: registered.6f2b80e9bb7c4e8af2104999fc25dbb3.font-ipa-ex.0.0.1
+  used_as: FontIpaEx
 - name: registered.6f2b80e9bb7c4e8af2104999fc25dbb3.font-latin-modern.0.0.1
   used_as: FontLatinModern
 - name: registered.6f2b80e9bb7c4e8af2104999fc25dbb3.std-ja-report.0.0.1
