@@ -32,7 +32,7 @@ end = struct
       end
     in
     let ib-code =
-      lines |> List.map-adjacent (fun (i, s) _ opt-next -> (
+      lines |> List.map-adjacent (fun (i, s) _ opt-next ->
         let ib-last =
           if Option.is-none opt-next then
             inline-fil
@@ -43,7 +43,7 @@ end = struct
         inline-skip (char-width *' (float i))
           ++ read-inline ctx-code (embed-string s)
           ++ ib-last
-      )) |> Inline.concat
+      ) |> Inline.concat
     in
     let ib-head = read-inline ctx it-head in
     let head-width = Inline.get-natural-advance ib-head in
@@ -57,7 +57,7 @@ end = struct
     let pad = 5pt in
     let pads = (left-indent-length, pad, pad, pad) in
     let decoset = VDecoSet.simple-frame thickness r#stroke-color r#fill-color in
-    block-frame-breakable ctx pads decoset (fun ctx -> (
+    block-frame-breakable ctx pads decoset (fun ctx ->
       build-code
         (ctx
           |> set-leading (font-size *' 1.1)
@@ -67,7 +67,7 @@ end = struct
         r#heading
         (left-indent-length -' pad)
         r#code
-    ))
+    )
 
   val inline ctx \compare r =
     let len = get-font-size ctx in

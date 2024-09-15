@@ -210,10 +210,10 @@ document (|
               val bar = 42
 
               val rec show-list show-elem xs =
-                List.fold-adjacent (fun s x _ next-opt -> (
+                List.fold-adjacent (fun s x _ next-opt ->
                   s ^ show-elem x ^
                     (if Option.is-none next-opt then ` ` else `, `#)
-                )) ` ` xs
+                ) ` ` xs
 
               val inline ctx \show-ints xs =
                 read-inline ctx (embed-string (show-list arabic xs))
@@ -302,6 +302,41 @@ document (|
         }
       >
       +subsection{型註釈}<
+        +p{
+          従来，完全な型推論ができることに加えて構文の制限が厳しかったため，型註釈が書かれることはほとんどありませんでした．
+          0.1.0-alpha.1では，OCamlによく似た構文で型註釈を書けるようになる予定です：
+
+          \compare(|
+            old = ```
+              let add : int -> int -> int
+                | add m n = m + n
+            ```,
+            new = ```
+              val add (m : int) (n : int) : int =
+                m + n
+            ```,
+          |);
+
+          型変数は，定義される値の識別子の直後に並べることで量化されて型註釈中で使えるようになり，
+          これにより多相型の型註釈も書けます．
+          既にスコープに含まれているものと同名の型変数を新たに導入することはできません：
+
+          \compare(|
+            old = ```
+              let-rec fold f acc ys =
+                match ys with
+                | []      -> acc
+                | x :: xs -> fold f (f acc x) xs
+            ```,
+            new = ```
+              val rec fold 'a 'b (f : 'a -> 'b) (a : 'a) (ys : list 'b) : 'a =
+                match ys with
+                | []      -> a
+                | x :: xs -> fold f (f a x) xs
+                end
+            ```,
+          |);
+        }
       >
       +subsection{レコード型の多相性}<
       >
