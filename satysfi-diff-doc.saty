@@ -11,7 +11,7 @@ document (|
     +p{
       \SATySFi; 0.1.0-alpha.1が1–2ヵ月程度の近いうちにリリースできそうな形になってきたので，
       既に\SATySFi; 0.0.xに馴染んでいるユーザの方々向けに，
-      0.0.xと比べてどのような非互換な変更が入るかをかなり簡潔に共有したいと思います．
+      2024年9月現在，0.0.xと比べてどのような非互換な変更が入るかをかなり簡潔に共有したいと思います．
     }
   >
   +chapter{言語設計上の非互換な変化}<
@@ -278,8 +278,8 @@ document (|
       >
       +subsection{数式の型と数式コマンドの意味論}<
         +p{
-          従来の数式には一律に `math` 型がつけられ，
-          コマンドは `\frac : [math; math] math-cmd` などという型つけが為されていました．
+          0.0.xでは，数式には一律に `math` 型がつけられ，
+          コマンドには `\frac : [math; math] math-cmd` などという型つけが為されていました．
           0.1.0-alpha.1では数式の型つけが大きく変わり，
           まずインラインやブロックと同様に\emph{`math-text` 型と `math-boxes` 型の区別ができました}．
           前者は原稿上に書かれた数式を扱う型で，後者は“既に組まれた”数式の型に相当します．
@@ -309,7 +309,7 @@ document (|
           \compare(|
             old = ```
               let add : int -> int -> int
-                | add m n = m + n
+                | m n = m + n
             ```,
             new = ```
               val add (m : int) (n : int) : int =
@@ -329,16 +329,23 @@ document (|
                 | x :: xs -> fold f (f acc x) xs
             ```,
             new = ```
-              val rec fold 'a 'b (f : 'a -> 'b) (a : 'a) (ys : list 'b) : 'a =
+              val rec fold 'a 'b
+                  (f : 'a -> 'b -> 'a) (acc : 'a) (ys : list 'b) : 'a =
                 match ys with
-                | []      -> a
-                | x :: xs -> fold f (f a x) xs
+                | []      -> acc
+                | x :: xs -> fold f (f acc x) xs
                 end
             ```,
           |);
         }
       >
       +subsection{レコード型の多相性}<
+        +p{
+          レコードの型つけは，典型的なユースケースにはほとんど影響がありませんが，
+          体系としてはかなり根本的に変わりました．
+          具体的には，従来はSML\#と同様に [Ohori 1995] に基づいた体系を採用していましたが，
+          列多相ベースの体系である [Gaster & Jones 1996] に基づくものに切り替えました．
+        }
       >
     >
     +section{モジュールシステム}<
