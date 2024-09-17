@@ -379,7 +379,9 @@ document (|
     +section{モジュールシステム}<
       +p{
         おそらく最も大きく変わるのがこのモジュールシステムで，
-        大幅に一般化され理論的にも筋の良い形になりました．
+        大幅に一般化され理論的にもより筋の良い形になったのではないかと思います．
+        定式化としては\emph{F-ing Modules}\cite[`RossbergRussoDreyer2014`];に準拠したモジュールシステムに切り替わり，
+        特にファンクタが使えるようになります．
       }
       +subsection{`direct` の廃止}<
         +p{
@@ -433,6 +435,15 @@ document (|
         title = {A polymorphic record calculus and its compilation},
         booktitle = {ACM Transactions on Programming Languages and Systems},
         year = 1995,
+      |)),
+      (`RossbergRussoDreyer2014`, article ?(
+        volume = {24},
+        number = {5},
+      ) (|
+        author = {| Andreas Rossberg | Claudio Russo | Derek Dreyer |},
+        title = {F-ing modules},
+        journal = {Journal of Functional Programming},
+        year = 2014,
       |)),
       (`gfngfn-labeled`, web-site (|
         author = {| Takashi Suwa |},
