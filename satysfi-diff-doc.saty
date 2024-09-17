@@ -2,6 +2,7 @@ use package open Stdlib.Logo
 use package open StdJaReport
 
 use open Local of `./local`
+use open Bib of `./bib`
 
 document (|
   title = {\SATySFi; 0.0.xユーザのための0.1.0-alpha.1手引き},
@@ -343,7 +344,7 @@ document (|
         +p{
           レコードの型つけは，典型的なユースケースにはほとんど影響がありませんが，
           体系としてはかなり根本的に変わりました．
-          具体的には，従来はSML\#と同様に [Ohori 1995] に基づいた体系を採用していましたが，
+          具体的には，従来はSML\#と同様に\cite[`Ohori1995`];に基づいた体系を採用していましたが，
           列多相ベースの体系である [Gaster & Jones 1996] に基づくものに切り替えました．
         }
       >
@@ -358,5 +359,19 @@ document (|
   +chapter{テスト機構}<
   >
   +chapter{今後入りそうな変更}<
+  >
+  +chapter{参考文献}<
+    +bibliography[
+      (`Ohori1995`, in-proceedings ?(
+        volume = {17},
+        number = {6},
+        pages = (844, 895),
+      ) (|
+        author = {| Atsushi Ohori |},
+        title = {A polymorphic record calculus and its compilation},
+        booktitle = {ACM Transactions on Programming Languages and Systems},
+        year = 1995,
+      |)),
+    ];
   >
 >

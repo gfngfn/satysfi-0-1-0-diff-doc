@@ -25,6 +25,11 @@ dependencies:
       registry: "default"
       name: "font-ipa-ex"
       requirement: "^0.0.1"
+  - used_as: "FontJunicode"
+    registered:
+      registry: "default"
+      name: "font-junicode"
+      requirement: "^0.0.1"
   - used_as: "StdJaReport"
     registered:
       registry: "default"

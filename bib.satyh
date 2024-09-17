@@ -1,0 +1,271 @@
+use package open Stdlib
+
+module Bib :> sig
+
+  type bib-item :: o
+
+  val in-proceedings : ?(
+    series : inline-text,
+    volume : inline-text,
+    number : inline-text,
+    pages  : int * int,
+  ) (|
+    author    : list inline-text,
+    title     : inline-text,
+    booktitle : inline-text,
+    year      : int,
+  |) -> bib-item
+
+  val article : ?(
+    volume : inline-text,
+    number : inline-text,
+    pages  : int * int,
+  ) (|
+    author  : list inline-text,
+    title   : inline-text,
+    journal : inline-text,
+    year    : int,
+  |) -> bib-item
+
+  val book : (|
+    author    : list inline-text,
+    title     : inline-text,
+    publisher : inline-text,
+    year      : int,
+  |) -> bib-item
+
+  val web-site : (|
+    author : list inline-text ,
+    title  : inline-text,
+    url    : string,
+    year   : int,
+  |) -> bib-item
+
+  type label = string
+
+  val \cite : inline [list label]
+
+  type bibliography-settings = (|
+    left-padding       : length,
+    url-styling        : context -> context,
+    book-title-styling : context -> context,
+  |)
+
+  val make-bibliography : bibliography-settings -> context -> list (label * bib-item) -> block-boxes
+
+end = struct
+
+  type bib-item =
+    | InProceedings of (|
+        author    : list inline-text,
+        title     : inline-text,
+        booktitle : inline-text,
+        year      : int,
+        series    : option inline-text,
+        volume    : option inline-text,
+        number    : option inline-text,
+        pages     : option (int * int),
+      |)
+    | Article of (|
+        author  : list inline-text,
+        title   : inline-text,
+        journal : inline-text,
+        year    : int,
+        volume  : option inline-text,
+        number  : option inline-text,
+        pages   : option (int * int),
+      |)
+    | Book of (|
+        author    : list inline-text,
+        title     : inline-text,
+        publisher : inline-text,
+        year      : int,
+      |)
+    | WebSite of (|
+        author : list inline-text ,
+        title  : inline-text,
+        url    : string,
+        year   : int,
+      |)
+
+  val in-proceedings ?(
+    series = series,
+    volume = volume,
+    number = number,
+    pages  = pages,
+  ) r =
+    InProceedings(|
+      author    = r#author,
+      title     = r#title,
+      booktitle = r#booktitle,
+      year      = r#year,
+      series    = series,
+      volume    = volume,
+      number    = number,
+      pages     = pages,
+    |)
+
+  val article ?(
+    volume = volume,
+    number = number,
+    pages  = pages,
+  ) r =
+    Article(|
+      author  = r#author,
+      title   = r#title,
+      journal = r#journal,
+      year    = r#year,
+      volume  = volume,
+      number  = number,
+      pages   = pages,
+    |)
+
+  val book r =
+    Book(r)
+
+  val web-site r =
+    WebSite(r)
+
+  type label = string
+
+  val bib-number-key (label : label) : CrossRef.key =
+    `bib:` ^ label
+
+  val inline ctx \cite (labels : list label) =
+    let sacc =
+      labels |> List.fold-adjacent (fun sacc label _ next-opt ->
+        let s-num =
+          match CrossRef.get (bib-number-key label) with
+          | None    -> `?`
+          | Some(s) -> s
+          end
+        in
+        match next-opt with
+        | None    -> sacc ^ s-num
+        | Some(_) -> sacc ^ s-num ^ `, `#
+        end
+      ) ` `
+    in
+    read-inline ctx (embed-string (`[` ^ sacc ^ `]`))
+
+  val join-authors (its : list inline-text) =
+    match List.reverse its with
+    | []               -> {}
+    | it :: []         -> it
+    | it2 :: it1 :: [] -> {#it1; and #it2;}
+
+    | it-last :: it-rest ->
+        let it =
+          it-rest |> List.reverse |> List.fold (fun itacc it -> (
+            {#itacc;#it;,\ }
+          )) {}
+        in
+        {#it;and #it-last;}
+    end
+
+  val inline ctx \book-title styling it =
+    read-inline (styling ctx) it
+
+  val uri-frame uri =
+    let deco (x, y) w h d =
+      let () = register-link-to-uri uri (x, y) w h d (Some(1pt, Color.red)) in
+      Graphics.empty
+    in
+    let pads = (0pt, 0pt, 0pt, 0pt) in
+    let decoset = (deco, deco, deco, deco) in
+    Inline.frame-breakable pads decoset
+
+  val inline ctx \url styling ?(url = url-opt) it =
+    let ctx = styling ctx in
+    let ib = read-inline ctx it in
+    match url-opt with
+    | None      -> ib
+    | Some(url) -> uri-frame url ib
+    end
+
+  val make-volume-and-number styling vol-opt num-opt series-opt =
+    let it-main =
+      match series-opt with
+      | None     -> {,\ }
+      | Some(it) -> {\ of \book-title(styling){#it;},\ }
+      end
+    in
+    match (vol-opt, num-opt) with
+    | (None, _)               -> {\ }
+    | (Some(it-vol), None)    -> {#it-vol;#it-main;}
+    | (Some(it-vol), Some(n)) -> {#it-vol;(#n;)#it-main;}
+    end
+
+  val make-pages pages-opt =
+    match pages-opt with
+    | None           -> {}
+    | Some((p1, p2)) -> let it = embed-string ((arabic p1) ^ `–` ^ (arabic p2)) in {pages #it;,\ }
+    end
+
+  val inline ctx \may-break =
+    discretionary 0 inline-nil inline-fil inline-nil
+
+  val bib-entry (ctx : context) (left-padding : length) (cite-num : int) (ib-main : inline-boxes) : block-boxes =
+    let ib-num = read-inline ctx (embed-string (`[` ^ arabic cite-num ^ `] `#)) in
+    let ib =
+      Inline.skip (0pt -' Inline.get-natural-advance ib-num)
+        ++ ib-num ++ ib-main ++ Inline.fil
+    in
+    let pads = (left-padding, 0pt, 0pt, 0pt) in
+    block-frame-breakable ctx pads VDecoSet.empty (fun ctx -> Block.form-paragraph ctx ib)
+
+  type bibliography-settings = (|
+    left-padding       : length,
+    url-styling        : context -> context,
+    book-title-styling : context -> context,
+  |)
+
+  val make-bibliography (settings : bibliography-settings) (ctx : context) (bibs : list (label * bib-item)) =
+    let () =
+      bibs |> List.iter-indexed (fun i (label, _) ->
+        CrossRef.register (bib-number-key label) (arabic (i + 1))
+      )
+    in
+    bibs |> List.map-indexed (fun i (_, bib-item) ->
+      let it =
+        match bib-item with
+        | InProceedings(r) ->
+            let it-authors = join-authors r#author in
+            let it-title = r#title in
+            let it-book-title = r#booktitle in
+            let it-volnum = make-volume-and-number settings#book-title-styling r#volume r#number r#series in
+            let it-pages = make-pages r#pages in
+            let it-year = embed-string (arabic r#year) in
+            {#it-authors;. #it-title;.
+              In \book-title(settings#book-title-styling){#it-book-title;}, #it-volnum;#it-pages;#it-year;.}
+
+        | Article(r) ->
+            let it-authors = join-authors r#author in
+            let it-title = r#title in
+            let it-journal = r#journal in
+            let it-volnum = make-volume-and-number settings#book-title-styling r#volume r#number None in
+            let it-pages = make-pages r#pages in
+            let it-year = embed-string (arabic r#year) in
+            {#it-authors;. #it-title;.
+              \book-title(settings#book-title-styling){#it-journal;}, #it-volnum;#it-pages;#it-year;.}
+
+        | Book(r) ->
+            let it-authors = join-authors r#author in
+            let it-title = r#title in
+            let it-publisher = r#publisher in
+            let it-year = embed-string (arabic r#year) in
+            {#it-authors;. \book-title(settings#book-title-styling){#it-title;}. #it-publisher;, #it-year;.}
+
+        | WebSite(r) ->
+            let it-authors = join-authors r#author in
+            let it-title = r#title in
+            let it-url = embed-string r#url in
+            let it-year = embed-string (arabic r#year) in
+            {#it-authors;. \book-title(settings#book-title-styling){#it-title;}.
+              \may-break;\url(settings#url-styling){#it-url;}, #it-year;.}
+        end
+      in
+      bib-entry ctx settings#left-padding (i + 1) (read-inline ctx it)
+    ) |> Block.concat
+
+end

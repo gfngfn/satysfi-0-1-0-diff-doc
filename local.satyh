@@ -1,10 +1,14 @@
 use package open Stdlib
 use package FontIpaEx
 use package FontLatinModern
+use package FontJunicode
+
+use open Bib of `./bib`
 
 module Local :> sig
   val \emph : inline [inline-text]
   val \compare : inline [(| old : string, new : string |)]
+  val +bibliography : block [list (label * bib-item)]
 end = struct
 
   val emph-color = Color.rgb 0. 0. 0.5
@@ -90,4 +94,16 @@ end = struct
             code = r#new,
           |);
         >)
+
+  val block ctx +bibliography bibs =
+    let settings =
+      (|
+        left-padding = 30pt,
+        url-styling = fun ctx -> ctx |>
+          set-font Latin (FontLatinModern.mono, 1., 0.),
+        book-title-styling = fun ctx -> ctx |>
+          set-font Latin (FontJunicode.italic, 1., 0.),
+      |)
+    in
+    make-bibliography settings ctx bibs
 end
