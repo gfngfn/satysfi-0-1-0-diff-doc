@@ -172,10 +172,7 @@ document (|
               author = {Takashi Suwa},
             |) '<
               +section{章題}<
-                +p{
-                  0.1.0-alpha.1での文書の例です．
-                  プリアンブル部分を除いてはほぼ変わりませんね．
-                }
+                +p{0.1.0-alpha.1での文書の例です．}
               >
             >
           ```,
@@ -324,7 +321,7 @@ document (|
 
           \compare(|
             old = ```
-              let-rec fold f acc ys =
+              let-rec fold f acc ys =  %型註釈は書けない
                 match ys with
                 | []      -> acc
                 | x :: xs -> fold f (f acc x) xs
@@ -419,7 +416,7 @@ document (|
               end
             ```,
             new = ```
-              module CrossRef : sig
+              module CrossRef :> sig
                 type key = string
                 type data = string
                 val register : key -> data -> unit
@@ -436,7 +433,7 @@ document (|
       >
       +subsection{入れ子のモジュール}<
         +p{
-          従来はモジュールを入れ子にすることがほとんど叶いませんでしたが，
+          従来はモジュールを入れ子にすることが（ほぼ）不可能でしたが，
           ごく普通に実現可能になりました．
         }
       >
