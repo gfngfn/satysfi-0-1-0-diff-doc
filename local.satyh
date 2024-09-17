@@ -18,7 +18,7 @@ end = struct
   val inline ctx \emph it =
     read-inline
       (ctx
-        |> set-text-color emph-color
+        |> Context.set-text-color emph-color
         |> set-font Latin (emph-font-latin, 1., 0.)
         |> set-font HanIdeographic (emph-font-cjk, 0.88, 0.)
         |> set-font Kana (emph-font-cjk, 0.88, 0.))
@@ -26,7 +26,7 @@ end = struct
 
   % Copied from the package `code`. TODO: refine this
   val build-code ctx it-head hanging code =
-    let font-size = get-font-size ctx in
+    let font-size = Context.get-font-size ctx in
     let char-width = Inline.get-natural-advance (read-inline ctx {0}) in
     let lines =
       match split-into-lines code with
@@ -39,12 +39,12 @@ end = struct
       lines |> List.map-adjacent (fun (i, s) _ opt-next ->
         let ib-last =
           if Option.is-none opt-next then
-            inline-fil
+            Inline.fil
           else
-            inline-fil ++ Inline.mandatory-break ctx
+            Inline.fil ++ Inline.mandatory-break ctx
         in
         let ctx-code = ctx |> set-space-ratio (char-width /' font-size) 0. 0. in
-        inline-skip (char-width *' (float i))
+        Inline.skip (char-width *' (float i))
           ++ read-inline ctx-code (embed-string s)
           ++ ib-last
       ) |> Inline.concat
@@ -96,13 +96,16 @@ end = struct
         >)
 
   val block ctx +bibliography bibs =
+    let font-size = Context.get-font-size ctx in
     let settings =
       (|
-        left-padding = 30pt,
-        url-styling = fun ctx -> ctx |>
-          set-font Latin (FontLatinModern.mono, 1., 0.),
-        book-title-styling = fun ctx -> ctx |>
-          set-font Latin (FontJunicode.italic, 1., 0.),
+        left-padding = 20pt,
+        url-styling = fun ctx -> ctx
+          |> set-font Latin (FontLatinModern.mono, 1., 0.)
+          |> Context.set-font-size (font-size *' 0.875)
+          |> Context.set-hyphen-min 10000 10000,
+        book-title-styling = fun ctx -> ctx
+          |> set-font Latin (FontJunicode.italic, 1., 0.),
       |)
     in
     make-bibliography settings ctx bibs

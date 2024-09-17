@@ -345,11 +345,67 @@ document (|
           レコードの型つけは，典型的なユースケースにはほとんど影響がありませんが，
           体系としてはかなり根本的に変わりました．
           具体的には，従来はSML\#と同様に\cite[`Ohori1995`];に基づいた体系を採用していましたが，
-          列多相ベースの体系である [Gaster & Jones 1996] に基づくものに切り替えました．
+          \emph{列多相}ベースの体系である \cite[`GasterJones1996`]; に基づくものに切り替えました．
+          従来は `constraint 'a :: (| foo : int |)` という型変数へのカインドづけによって
+          「`'a` は少なくとも `foo : int` というフィールドを持っているような任意のレコード型である」
+          という多相性を表現していましたが，0.1.0-alpha.1ではこうした多相性は列変数を使って
+          `(| foo : int | ?'r |)` という具合に表現されるようになります．
+          また，このとき列変数 `?'r` が `foo` というラベルを持っていないことを表すために，
+          `?'r :: (| foo |)` というカインドづけが行なわれるようになります．
+          型変数には一律で `o` というカインドがつく一方で，
+          列変数にはその列変数が持たないラベルを集めた有限集合のカインドがつきます．
         }
       >
     >
+    +section{ラベルつきオプション引数}<
+      +p{
+        詳細の解説は\cite[`gfngfn-labeled`];に譲りますが，
+        オプション引数がラベルつきになります：
+
+        \compare(|
+          old = ```
+            +section?:(`sec:sample`)?:(`Sample`){Sample}<
+             +p{章の本文です．}
+            >
+          ```,
+          new = ```
+            +section?(ref = `sec:sample`, outline = `Sample`){Sample}<
+             +p{章の本文です．}
+            >
+          ```,
+        |);
+      }
+    >
     +section{モジュールシステム}<
+      +p{
+        おそらく最も大きく変わるのがこのモジュールシステムで，
+        大幅に一般化され理論的にも筋の良い形になりました．
+      }
+      +subsection{`direct` の廃止}<
+        +p{
+          従来は，シグネチャ中で `val \foo` のかわりに `direct \foo` と書くと，
+          ストラクチャ `Bar` のメンバとして定義されていながらも，
+          そのストラクチャの外で `\Bar.foo` だけでなくその識別子単独である `\foo` がスコープに入るようになっていました．
+          つまり，ストラクチャ外から見ると，勝手にその識別子についてのみ勝手に `open` されるような仕組みでした．
+          これは典型的な状況では幾分か便利ではあったものの，
+          コマンド名の衝突に脆弱なため結局のところ使う側が `open` で制御できた方がよく，
+          しかもファンクタなどには一般化しづらい仕組みなので，このたび廃止することにしました．
+        }
+      >
+      +subsection{シグネチャづけのトークンを `:` から `:>` へ}<
+        +p{
+          Standard MLの構文に倣い，\emph{opaque signature ascriptionの記述は `:` ではなく `:>` で書くようになります}．
+          詳しくは次節以降の例をご参照ください．
+        }
+      >
+      +subsection{実体が公開される型}<
+        +p{
+          従来のストラクチャでは，シグネチャをつけると型のメンバが必ず実体非公開の抽象型扱いになっていましたが，
+          Standard MLやOCamlなどと同様に，実体をシグネチャにも記載することで公開できるようになりました．
+        }
+      >
+      +subsection{生成的ファンクタ}<
+      >
     >
     +section{多段階計算}<
     >
@@ -362,6 +418,12 @@ document (|
   >
   +chapter{参考文献}<
     +bibliography[
+      (`GasterJones1996`, in-proceedings (|
+        author = {| Benedict R. Gaster | Mark P. Jones |},
+        title = {A polymorphic type system for extensible records and variants},
+        booktitle = {Technical Report NOTTCS-TR-96-3, Department of Computer Science, University of Nottingham},
+        year = 1996,
+      |)),
       (`Ohori1995`, in-proceedings ?(
         volume = {17},
         number = {6},
@@ -372,6 +434,12 @@ document (|
         booktitle = {ACM Transactions on Programming Languages and Systems},
         year = 1995,
       |)),
+      (`gfngfn-labeled`, web-site (|
+        author = {| Takashi Suwa |},
+        title = {\SATySFi; v0.1.0に向けたラベルつきオプション引数の型システム},
+        url = `https://gfngfn.github.io/ja/posts/2022-05-22-a-type-system-of-labeled-optional-parameters-for-satysfi/`,
+        year = 2022,
+      |))
     ];
   >
 >
