@@ -403,10 +403,44 @@ document (|
       +subsection{実体が公開される型}<
         +p{
           従来のストラクチャでは，シグネチャをつけると型のメンバが必ず実体非公開の抽象型扱いになっていましたが，
-          Standard MLやOCamlなどと同様に，実体をシグネチャにも記載することで公開できるようになりました．
+          Standard MLやOCamlなどと同様に，実体をシグネチャにも記載することで公開できるようになりました：
+
+          \compare(|
+            old = ```
+              type key = string
+              type data = string
+
+              module CrossRef : sig
+                val register : key -> data -> unit
+                val get : key -> data option
+              end = struct
+                let register = register-cross-reference
+                let get = get-cross-reference
+              end
+            ```,
+            new = ```
+              module CrossRef : sig
+                type key = string
+                type data = string
+                val register : key -> data -> unit
+                val get : key -> data option
+              end = struct
+                type key = string
+                type data = string
+                val register = register-cross-reference
+                val get = get-cross-reference
+              end
+            ```,
+          |);
         }
       >
-      +subsection{生成的ファンクタ}<
+      +subsection{入れ子のモジュール}<
+        +p{
+          従来はモジュールを入れ子にすることがほとんど叶いませんでしたが，
+          ごく普通に実現可能になりました．
+        }
+      >
+      +subsection{ファンクタ}<
       >
     >
     +section{多段階計算}<
@@ -450,7 +484,7 @@ document (|
         title = {\SATySFi; v0.1.0に向けたラベルつきオプション引数の型システム},
         url = `https://gfngfn.github.io/ja/posts/2022-05-22-a-type-system-of-labeled-optional-parameters-for-satysfi/`,
         year = 2022,
-      |))
+      |)),
     ];
   >
 >
